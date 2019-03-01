@@ -1,0 +1,285 @@
+#include <kipr/botball.h>
+#define speed 100
+#define fast 200
+#define slow 20
+#define one 1000
+#define five_one 500
+#define one_five 1500
+#define two 2000
+#define between_analog 2000
+#define black 2000
+#define white 2100
+#define top_hat 0
+#define arm 2
+#define arm_up 1650
+#define arm_down 650
+#define arm_between 900
+#define claw 0
+#define claw_open 1000
+#define claw_close 1450
+#define touch_sensor1 0
+#define touch_sensor2 1
+#define touched 1
+#define untouched 0
+#define light 1
+
+void white_board_backwards();
+void white_board_forward();
+void black_line_forward();
+void black_line_backwards();
+void turn_right_90();
+void follow_line_backwards_white();
+void follow_line_backwards_black();
+void turn_around();
+void turn_left_white();
+void turn_left_black();
+void backwards_black();
+void turn_right_white();
+void turn_90_fast();
+void turn_90_fast_opposite();
+void follow_line_forward();
+void drive_forward_untouched();
+void follow_line_untouched_right();
+void follow_line_untouched_left();
+
+int main()
+{
+    create_connect();
+    enable_servos();
+    set_servo_position(arm,arm_up);
+    set_servo_position(claw,claw_open);
+    create_stop();
+    msleep(one);
+    set_create_total_angle(0);
+    while(get_create_total_angle() < 75)
+    {
+        create_drive_direct(-slow,slow);
+    }
+    white_board_backwards();
+    black_line_backwards();
+    white_board_backwards();
+    black_line_backwards();
+    turn_right_90();
+    follow_line_untouched_left();
+    create_drive_direct(speed,0);
+    msleep(five_one);
+    create_drive_direct(speed,speed);
+    msleep(one);
+    turn_around();
+    follow_line_untouched_right();
+    create_drive_direct(fast,fast);
+    msleep(two);
+    set_servo_position(arm,arm_between);
+    set_servo_position(claw,claw_close);
+    create_drive_direct(-fast,-fast);
+    msleep(one);
+    set_create_total_angle(0);
+    while(get_create_total_angle() < 30)
+    {
+        create_drive_direct(-slow,0);
+    }
+    disable_servos();
+    create_disconnect();
+    return 0;
+}
+
+void white_board_backwards()
+{
+    while(analog(top_hat) < between_analog)
+    {
+        create_drive_direct(-speed,-speed);
+    }
+}
+
+void follow_line_forward()
+{
+    while(get_create_lbump() == 0 && get_create_rbump() == 0)
+    {
+        if(get_create_rfcliff_amt() > black)
+        {
+            create_drive_direct(speed,slow);
+        }
+        else
+        {
+            create_drive_direct(slow,speed);
+        }
+    }
+}
+
+void white_board_forward()
+{
+    while(analog(top_hat) < between_analog)
+    {
+        create_drive_direct(speed,speed);
+    }
+}
+
+void black_line_forward()
+{
+    while(analog(top_hat) >	between_analog)
+    {
+        create_drive_direct(speed,speed);
+    }
+}
+
+void drive_forward_untouched()
+{
+    while(get_create_lbump() == 0 && get_create_rbump() == 0)
+    {
+        create_drive_direct(speed,speed);
+    }
+}
+
+void backwards_black()
+{
+    while(get_create_rcliff_amt() > white)
+    {
+        create_drive_direct(speed,speed);
+    }
+    create_stop();
+    msleep(five_one);
+    while(get_create_lcliff_amt() < black)
+    {
+        create_drive_direct(speed,0);
+    }
+    create_stop();
+    msleep(five_one);
+    while(get_create_rcliff_amt() < black)
+    {
+        create_drive_direct(0,speed);
+    }
+    create_stop();
+    msleep(five_one);
+    while(get_create_lcliff_amt() < black)
+    {
+        create_drive_direct(speed,0);
+    }
+}
+
+void turn_90_fast()
+{
+    set_create_total_angle(0);
+    while(get_create_total_angle() > -100)
+    {
+        create_drive_direct(speed,-speed);
+    }
+}
+
+void turn_90_fast_opposite()
+{
+    set_create_total_angle(0);
+    while(get_create_total_angle() < 100)
+    {
+        create_drive_direct(-speed,speed);
+    }
+}
+
+void black_line_backwards()
+{
+    while(analog(top_hat) > between_analog)
+    {
+        create_drive_direct(-speed,-speed);
+    }
+}
+
+void turn_right_90()
+{
+    set_create_total_angle(0);
+    while(get_create_total_angle() < 80)
+    {
+        create_drive_direct(-speed,0);
+    }
+}
+
+void turn_left_white()
+{
+    while(analog(top_hat) < between_analog)
+    {
+        create_drive_direct(-speed,0);
+    } 
+}
+
+void turn_left_black()
+{
+    while(analog(top_hat) > between_analog)
+    {
+        create_drive_direct(-speed,0);
+    } 
+}
+
+void turn_right_white()
+{
+   while(analog(top_hat) < between_analog)
+    {
+        create_drive_direct(slow,speed);
+    } 
+}
+
+void turn_around()
+{
+    set_create_total_angle(0);
+    while(get_create_total_angle() < 190)
+    {
+        create_drive_direct(-speed,speed);
+    }
+}
+
+void follow_line_backwards_white()
+{
+    while(get_create_rcliff_amt() > white)
+    {
+        if(analog(top_hat) > between_analog)
+        {
+            create_drive_direct(-slow,-speed);
+        }
+        else
+        {
+            create_drive_direct(-speed,-slow);
+        }
+    }
+}
+
+void follow_line_backwards_black()
+{
+    while(get_create_rcliff_amt() < white)
+    {
+        if(analog(top_hat) > between_analog)
+        {
+            create_drive_direct(-slow,-speed);
+        }
+        else
+        {
+            create_drive_direct(-speed,-slow);
+        }
+    }
+}
+
+void follow_line_untouched_right()
+{
+    while(digital(touch_sensor1) == untouched && digital(touch_sensor2) == untouched)
+    {
+        if(analog(top_hat) > between_analog)
+        {
+            create_drive_direct(-speed,-slow);
+        }
+        else
+        {
+            create_drive_direct(-slow,-speed);
+        }
+    }
+}
+
+void follow_line_untouched_left()
+{
+    while(digital(touch_sensor1) == untouched && digital(touch_sensor2) == untouched)
+    {
+        if(analog(top_hat) > between_analog)
+        {
+            create_drive_direct(-slow,-speed);
+        }
+        else
+        {
+            create_drive_direct(-speed,-slow);
+        }
+    }
+}
