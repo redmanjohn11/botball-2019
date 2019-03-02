@@ -1,0 +1,178 @@
+#include <kipr/botball.h>
+#define between_analog 2000
+#define line
+#define sonar
+#define close
+#define touch
+#define untouched 0
+#define left_wheel
+#define right_wheel
+#define fast 100
+#define medium 50
+#define slow 10
+#define arm
+#define arm_up
+#define arm_down
+#define claw
+#define claw_open
+#define claw_close
+#define claw_close_fully
+#define one 1000
+#define five_one 500
+#define one_five 1500
+#define two 2000
+
+void white_board_backwards();
+void white_board_forward();
+void black_line_forward();
+void black_line_backwards();
+void follow_line_untouched();
+void move_forward_time();
+void move_backwards_time();
+void turn_left();
+void turn_right();
+void turn_left_fast();
+void turn_right_fast();
+void follow_line_close();
+
+int main()
+{
+    enable_servos();
+    turn_right_fast(medium,five_one);
+    turn_left(medium,one);
+    follow_line_close(medium,slow);
+    set_servo_position(claw,claw_close);
+    msleep(five_one);
+    set_servo_position(arm,arm_up);
+    msleep(five_one);
+    move_forward_time(fast,five_one);
+    black_line_forward();
+    white_board_forward();
+    black_line_forward();
+    turn_left(medium,one);
+    follow_line_untouched(fast,-slow);
+    disable_servos();
+    return 0;
+}
+
+void white_board_backwards()
+{
+    while(analog(top_hat) < between_analog)
+    {
+        motor(left_wheel, -medium);
+        motor(right_wheel, -medium);
+    }
+    ao();
+}
+
+void white_board_forward()
+{
+    while(analog(top_hat) < between_analog)
+    {
+        motor(left_wheel, medium);
+        motor(right_wheel, medium);
+    }
+    ao();
+}
+
+void black_line_forward()
+{
+    while(analog(top_hat) > between_analog)
+    {
+        motor(left_wheel, medium);
+        motor(right_wheel, medium);
+    }
+    ao();
+}
+
+void black_line_backwards()
+{
+    while(analog(top_hat) > between_analog)
+    {
+        motor(left_wheel, -medium);
+        motor(right_wheel, -medium);
+    }
+    ao();
+}
+
+void follow_line_untouched(int left_speed, int right_speed)
+{
+    while(digital(touch) == untouched)
+    {
+        if(analog(line) > between_analog)
+        {
+            motor(left_wheel,left_speed);
+            motor(right_wheel,right_speed);
+        }
+        else
+        {
+            motor(right_wheel,left_speed);
+            motor(left_wheel,right_speed);
+        }
+    }
+    ao();
+}
+
+void move_forward_time(int speed,int time)
+{
+    motor(left_wheel,speed);
+    motor(right_wheel,speed);
+    msleep(time);
+    ao();
+}
+
+void move_backwards_time(int speed,int time)
+{
+    motor(left_wheel,-speed);
+    motor(right_wheel,-speed);
+    msleep(time);
+    ao();
+}
+
+void turn_left(int speed,int time)
+{
+    motor(right_wheel,speed);
+    msleep(time);
+    ao();
+}
+
+void turn_right(int speed,int time)
+{
+    motor(left_wheel,speed);
+    msleep(time);
+    ao();
+}
+
+void turn_left_fast(int speed,int time)
+{
+    motor(left_wheel,-speed);
+    motor(right_wheel,speed);
+    msleep(time);
+    ao();
+}
+
+void turn_right_fast(int speed,int time)
+{
+    motor(left_wheel,speed);
+    motor(right_wheel,-speed);
+    msleep(time);
+    ao();
+}
+
+void follow_line_close(int left_speed,int right_speed)
+{
+    while(analog(sonar) < close)
+   {
+        if(analog(line) > between_analog)
+        {
+            motor(left_wheel,left_speed);
+            motor(right_wheel,right_speed);
+        }
+        else
+        {
+            motor(right_wheel,left_speed);
+            motor(left_wheel,right_speed);
+        }
+      }
+      ao();
+}
