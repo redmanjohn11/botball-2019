@@ -1,0 +1,247 @@
+#include <kipr/botball.h>
+#define medium 100
+#define fast 200
+#define slow 25
+#define between_analog 2000
+#define black 2000
+#define white 2100
+#define top_hat 0
+#define arm 2
+#define arm_up 1800
+#define arm_down 775
+#define arm_between 1100
+#define claw 0
+#define claw_open 1000
+#define claw_close 1450
+#define touch_sensor1 0
+#define touch_sensor2 1
+#define touched 1
+#define untouched 0
+#define light 5
+
+void white_board_backwards();
+void white_board_forward();
+void black_line_forward();
+void black_line_backwards();
+void follow_line_backwards_white();
+void follow_line_backwards_black();
+void follow_line_forward_untouched();
+void follow_line_untouched_backwards();
+void drive_forward_time();
+void drive_backwards_time();
+void turn_right();
+void turn_left();
+void turn_right_backwards();
+void turn_left_backwards();
+void turn_right_fast();
+void turn_left_fast();
+void create_stay();
+
+int main()
+{
+    create_connect();
+    enable_servos();
+    set_servo_position(arm,arm_up);
+    create_stay(500);
+    turn_left_fast(85,medium);
+    white_board_backwards();
+    black_line_backwards();
+    white_board_backwards();
+    black_line_backwards();
+    turn_left_backwards(75,medium);
+    follow_line_untouched_backwards(slow,fast);
+    turn_right(15,medium);
+    drive_forward_time(fast,1000);
+    turn_right_fast(190,fast);
+    follow_line_untouched_backwards(fast,slow);
+    drive_forward_time(fast,2000);
+    set_servo_position(arm,arm_between);
+    set_servo_position(claw,claw_close);
+    create_stay(250);
+    drive_backwards_time(fast,1125);
+    turn_left_backwards(25,slow);
+    drive_backwards_time(slow,750);
+    turn_left_backwards(20,slow);
+    turn_right(35,medium);
+    drive_forward_time(fast,1500);
+    turn_right_fast(35,medium);
+    drive_backwards_time(fast,500);
+    follow_line_untouched_backwards(slow,fast);
+    drive_forward_time(fast,2000);
+    create_stay(250);
+    turn_right_fast(5,slow);
+    drive_backwards_time(fast,1125);
+    turn_right_backwards(20,slow);
+    drive_backwards_time(slow,500);
+    turn_right_backwards(20,slow);
+    turn_left(25,medium);
+    drive_forward_time(fast,1000);
+    disable_servos();
+    create_disconnect();
+    return 0;
+}
+
+void white_board_backwards()
+{
+    while(analog(top_hat) < between_analog)
+    {
+        create_drive_direct(-medium,-medium);
+    }
+}
+
+void white_board_forward()
+{
+    while(analog(top_hat) < between_analog)
+    {
+        create_drive_direct(medium,medium);
+    }
+}
+
+void black_line_forward()
+{
+    while(analog(top_hat) >	between_analog)
+    {
+        create_drive_direct(medium,medium);
+    }
+}
+
+void black_line_backwards()
+{
+    while(analog(top_hat) > between_analog)
+    {
+        create_drive_direct(-medium,-medium);
+    }
+}
+
+void follow_line_backwards_white()
+{
+    while(get_create_rcliff_amt() > white)
+    {
+        if(analog(top_hat) > between_analog)
+        {
+            create_drive_direct(-slow,-medium);
+        }
+        else
+        {
+            create_drive_direct(-medium,-slow);
+        }
+    }
+}
+
+void follow_line_backwards_black()
+{
+    while(get_create_rcliff_amt() < white)
+    {
+        if(analog(top_hat) > between_analog)
+        {
+            create_drive_direct(-slow,-medium);
+        }
+        else
+        {
+            create_drive_direct(-medium,-slow);
+        }
+    }
+}
+
+void follow_line_forward_untouched(int speed_left,int speed_right)
+{
+    while(get_create_lbump() == 0 && get_create_rbump() == 0)
+    {
+        if(get_create_rfcliff_amt() > black)
+        {
+            create_drive_direct(speed_left,speed_right);
+        }
+        else
+        {
+            create_drive_direct(speed_right,speed_left);
+        }
+    }
+}
+
+void follow_line_untouched_backwards(int speed_left, int speed_right)
+{
+    while(digital(touch_sensor1) == untouched && digital(touch_sensor2) == untouched)
+    {
+        if(analog(top_hat) > between_analog)
+        {
+            create_drive_direct(-speed_left,-speed_right);
+        }
+        else
+        {
+            create_drive_direct(-speed_right,-speed_left);
+        }
+    }
+}
+
+void drive_forward_time(int speed,int time)
+{
+    create_drive_direct(speed,speed);
+    msleep(time);
+}
+
+void drive_backwards_time(int speed,int time)
+{
+    create_drive_direct(-speed,-speed);
+    msleep(time);
+}
+
+void turn_right(int angle,int speed)
+{
+    set_create_total_angle(0);
+    while(get_create_total_angle() > -angle)
+    {
+        create_drive_direct(speed,0);
+    }
+}
+    
+void turn_left(int angle,int speed)
+{
+    set_create_total_angle(0);
+    while(get_create_total_angle() < angle)
+    {
+        create_drive_direct(0,speed);
+    }
+}   
+ 
+void turn_right_backwards(int angle,int speed)
+{
+    set_create_total_angle(0);
+    while(get_create_total_angle() > -angle)
+    {
+        create_drive_direct(0,-speed);
+    }
+    
+}
+
+void turn_left_backwards(int angle,int speed)
+{
+    set_create_total_angle(0);
+    while(get_create_total_angle() < angle)
+    {
+        create_drive_direct(-speed,0);
+    }
+}
+
+void turn_right_fast(int angle,int speed)
+{
+    set_create_total_angle(0);
+    while(get_create_total_angle() > -angle)
+    {
+        create_drive_direct(speed,-speed);
+    }
+}    
+
+void turn_left_fast(int angle,int speed)
+{
+    set_create_total_angle(0);
+    while(get_create_total_angle() < angle)
+    {
+        create_drive_direct(-speed,speed);
+    }
+}  
+
+void create_stay(int time)
+{
+    create_stop();
+    msleep(time);
+}
