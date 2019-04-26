@@ -1,0 +1,596 @@
+#include <kipr/botball.h>
+#define between_analog 1500
+#define line 0
+#define light 4
+#define sonar 5
+#define close 2400
+#define touch 0
+#define untouched 0
+#define left_wheel 1
+#define right_wheel 3
+#define fast 200
+#define medium 100
+#define slow 10
+#define arm 2
+#define arm_up 200
+#define arm_between 1350
+#define arm_down 1400
+#define claw 1
+#define claw_open 1600
+#define claw_close 325
+#define claw_close_object 275
+#define silver 3700
+#define top_hat_left 3
+#define top_hat_right 1
+#define buff 15
+
+void white_board_backwards();
+void white_board_forward();
+void black_line_forward();
+void black_line_backwards();
+void follow_line_untouched();
+void drive_forward_time();
+void drive_backwards_time();
+void turn_left();
+void turn_right();
+void turn_left_fast();
+void turn_right_fast();
+void follow_line_close();
+void follow_line_th_left();
+void follow_line_th_right();
+void black_line_forward_th();
+void black_line_backwards_th();
+void white_board_forward_th();
+void white_board_backwards_th();
+void drive_forward_untouched();
+void turn_left_th();
+void turn_right_th();
+void demo_stay();
+void special_turn();
+void move_ambulance();
+void single_firefighter_pickup();
+void view_card();
+void right_firetruck();
+void left_firetruck();
+void left_firefighters();
+void right_firefighters();
+
+int trial;
+int number;
+int fire_zone;
+int main()
+{
+    wait_for_light(light);
+    shut_down_in(119);
+    enable_servos();
+    move_ambulance();
+    single_firefighter_pickup();
+    view_card();
+    disable_servos();
+    return 0;
+}
+
+void move_ambulance()
+{  
+    demo_stay(2000);
+    set_servo_position(arm,arm_up);
+    drive_forward_time(fast,1400); //Move for create ambulance
+    white_board_backwards(); //Go back to starting box
+    set_servo_position(arm,arm_down);
+    black_line_backwards();
+}
+                   
+void single_firefighter_pickup()
+{
+    turn_right_fast(medium,500);
+    drive_forward_time(fast,700);
+    set_servo_position(claw,claw_close); //Pick up firefighter
+    demo_stay(500);
+    set_servo_position(arm,arm_up);
+    demo_stay(250);
+    drive_backwards_time(fast,2750);
+    demo_stay(500); //Wait for create to go by
+    turn_left(fast,1100);
+    drive_forward_time(fast,750);
+    white_board_forward();
+    drive_forward_time(fast,50);
+    turn_left(medium,1200);
+    follow_line_th_left(fast,slow); //Move blocks off black line
+    turn_left(fast,500);
+    drive_forward_time(fast,100);
+    drive_backwards_time(fast,100);
+    turn_left(-fast,500);
+    turn_right_fast(medium,425);
+    follow_line_untouched(fast,slow); //Move poms out of the way
+    drive_backwards_time(fast,500);
+    demo_stay(250);
+    turn_right_fast(medium,425);
+    demo_stay(250);
+    drive_forward_time(fast,750);
+    drive_backwards_time(fast,750);
+    turn_left_fast(medium,375);
+    demo_stay(250);
+    follow_line_untouched(fast,slow);
+    drive_backwards_time(fast,525);
+    turn_left_fast(medium,325); //See if index card is there
+}
+    
+void view_card()
+{
+    camera_open_black();
+    int number=0;
+    int fire_zone=0;
+    demo_stay(1000);
+    while(number<15)
+    {
+        camera_update();
+        msleep(10);
+        if((get_object_center_x(0,0) > 0) && (get_object_center_x(0,0) < 159)) //Index card is there
+        {
+            printf("I see index card \n");
+        }
+        else //Index card is not there
+        {
+            printf("No index card seen \n");
+        } 
+        number=number+1;
+    }
+    while(number<25)
+    {
+        camera_update();
+        msleep(10);
+        if((get_object_center_x(0,0) > 0) && (get_object_center_x(0,0) < 159)) //Index card is there
+        {
+            printf("I see index card \n");
+            fire_zone=fire_zone+1;
+        }
+        else //Index card is not there
+        {
+            printf("No index card seen \n");
+        }
+        number=number+1;
+    }
+    if(fire_zone > 7)
+    {
+        printf("Delivering to Right Zone \n");
+        right_firetruck();
+    	right_firefighters();
+    }
+    else
+    {
+        printf("Delivering to Left Zone \n");
+        left_firetruck();
+        left_firefighters();
+    }
+    camera_close();
+}
+                      
+void right_firetruck()
+{
+    printf("I can see the card! \n");
+    set_servo_position(arm,arm_down);
+    demo_stay(500);
+    turn_right(fast,150);
+    drive_forward_time(fast,100);
+    set_servo_position(claw,claw_open); //Put firefighter down
+    demo_stay(250);
+    set_servo_position(arm,arm_up);
+    demo_stay(250);
+    drive_backwards_time(fast,200);
+    turn_right(-fast,150);
+    turn_left(fast,100);
+    demo_stay(250);
+    turn_left_fast(medium,325); //Setup for firetruck
+    follow_line_th_right(slow,medium);
+    turn_right(-fast,500);
+    turn_left(fast,150);
+    drive_forward_untouched();
+    demo_stay(500);
+    drive_backwards_time(fast,350);
+    set_servo_position(arm,arm_down);
+    turn_left(-fast,1025);
+    drive_forward_time(fast,100);
+    white_board_forward();
+    drive_backwards_time(fast,50);
+    set_servo_position(claw,claw_close); //Pick up firetruck
+    demo_stay(500);
+    drive_backwards_time(fast,150);
+    set_servo_position(arm,arm_up);
+    turn_right_fast(medium,275);
+    demo_stay(250);
+    white_board_forward();
+    drive_forward_time(fast,750);
+    turn_left(fast,500);
+    turn_right(fast,500);
+    follow_line_untouched(fast,slow);
+    drive_backwards_time(fast,500);
+    turn_left_fast(medium,350);
+    turn_left(fast,250);
+    demo_stay(250);
+    set_servo_position(arm,arm_down);
+    demo_stay(250);
+    set_servo_position(claw,claw_open); //Put down firetruck
+    demo_stay(250);
+    set_servo_position(arm,arm_up);
+    demo_stay(250);
+    turn_left(-fast,250);
+    turn_left(-fast,1200);
+    turn_right_fast(medium,850);
+    drive_forward_untouched();
+    demo_stay(250);
+    drive_backwards_time(fast,450);
+    turn_left(-fast,1125);
+    white_board_forward();
+    black_line_forward();
+    drive_backwards_time(fast,50);
+    turn_right(fast,50);
+}
+
+void right_firefighters()
+{
+    for(trial=0; trial<5; trial=trial+1)
+    {
+    	set_servo_position(arm,arm_up); //Setup for cube
+    	set_servo_position(claw,claw_open);
+    	demo_stay(250);
+    	follow_line_close(slow,fast);
+        drive_backwards_time(fast,50);
+    	set_servo_position(arm,arm_down);
+    	demo_stay(500);
+    	turn_left(fast,100);
+    	set_servo_position(claw,claw_close_object); //Grab cube
+    	demo_stay(500);
+    	white_board_backwards_th(); //Bring cube to right zone
+        demo_stay(250);
+    	set_servo_position(arm,arm_up);
+        drive_backwards_time(fast,200);
+    	demo_stay(250);
+    	turn_right(fast,1150);
+    	drive_forward_time(fast,750);
+    	follow_line_th_left(fast,slow);
+    	turn_left(fast,250);
+    	follow_line_untouched(fast,slow);
+    	drive_backwards_time(fast,250);
+    	turn_right(-fast,1100);
+    	set_servo_position(arm,arm_down);
+    	demo_stay(500);
+    	set_servo_position(claw,claw_open); //Place cube down
+    	turn_right(fast,300);
+    	drive_forward_time(fast,550);
+    	drive_backwards_time(fast,600);
+    	turn_right(-fast,200);
+    	set_servo_position(arm,arm_up);
+    	demo_stay(250);
+    	turn_left_fast(medium,950);
+        drive_forward_untouched();
+    	demo_stay(250);
+    	drive_backwards_time(fast,700);
+    	turn_left(-fast,1075);
+    	white_board_forward_th();
+        black_line_forward(fast);
+        turn_right(fast,50);
+        drive_backwards_time(fast,50);
+    }
+}
+
+void left_firetruck()
+{
+    printf("Where the card at? \n");
+    turn_left(fast,300);
+    turn_left_fast(medium,325); //Setup for firetruck
+    follow_line_th_right(slow,medium);
+    turn_right(-fast,500);
+    turn_left(fast,200);
+    drive_forward_untouched();
+    set_servo_position(arm,arm_between); //Get rid of firefighter
+    set_servo_position(claw,claw_open);
+    demo_stay(500);
+    set_servo_position(arm,arm_up);
+    demo_stay(250);
+    drive_backwards_time(fast,375);
+    set_servo_position(arm,arm_down);
+    turn_left(-fast,1025);
+    drive_forward_time(fast,100);
+    white_board_forward();
+    drive_backwards_time(fast,50);
+    set_servo_position(claw,claw_close); //Pick up firetruck
+    demo_stay(500);
+    turn_left_th(slow);
+    turn_right_th(slow);
+    turn_left_th(slow);
+    set_servo_position(arm,arm_up);
+    demo_stay(500);
+    turn_left_fast(medium,450); //Setup for firetruck
+    demo_stay(500);
+    drive_backwards_time(fast,3000); 
+    drive_forward_time(fast,1750);
+    turn_left(fast,800);
+    drive_forward_untouched();
+    demo_stay(500);
+    drive_backwards_time(fast,400);
+    turn_left(-fast,1200);
+    white_board_forward();
+    turn_right(fast,1100);
+    turn_left(fast,500);
+    white_board_forward();
+    black_line_forward();
+    set_servo_position(arm,arm_down); //Put down firetruck
+    demo_stay(250);
+    set_servo_position(claw,claw_open);
+    demo_stay(250);
+    set_servo_position(arm,arm_up);
+    drive_backwards_time(fast,500);
+    turn_right(-fast,1100);
+    white_board_forward();
+    black_line_forward();
+    turn_right(fast,50);
+}
+
+void left_firefighters()
+{
+    for(trial=0; trial<5; trial=trial+1)
+  	{
+        set_servo_position(arm,arm_up); //Setup for cube
+    	set_servo_position(claw,claw_open);
+    	demo_stay(250);
+    	follow_line_close(slow,fast);
+        drive_backwards_time(fast,50);
+    	set_servo_position(arm,arm_down);
+    	demo_stay(500);
+    	turn_left(fast,100);
+    	set_servo_position(claw,claw_close_object); //Grab cube
+    	demo_stay(500);
+		turn_left(-fast,50);
+		white_board_backwards_th();
+		turn_right(fast,700);
+		drive_forward_time(fast,250);
+        white_board_forward(fast);
+        set_servo_position(arm,arm_between);
+        black_line_forward(fast);
+		set_servo_position(claw,claw_open); //Let firefighter go
+		demo_stay(250);
+		drive_backwards_time(fast,1000);
+		turn_right(-fast,1200);
+		white_board_backwards_th();
+    }
+}
+
+void white_board_backwards()
+{
+    while(analog(line) < between_analog)
+    {
+        motor(left_wheel,-medium);
+        motor(right_wheel,-medium+buff);
+    }
+    ao();
+}
+
+void white_board_forward()
+{
+    while(analog(line) < between_analog)
+    {
+        motor(left_wheel,medium);
+        motor(right_wheel,medium-buff);
+    }
+    ao();
+}
+
+void black_line_forward()
+{
+    while(analog(line) > between_analog)
+    {
+        motor(left_wheel,medium);
+        motor(right_wheel,medium-buff);
+    }
+    ao();
+}
+
+void black_line_backwards()
+{
+    while(analog(line) > between_analog)
+    {
+        motor(left_wheel,-medium);
+        motor(right_wheel,-medium+buff);
+    }
+    ao();
+}
+
+void follow_line_untouched(int left_speed,int right_speed)
+{
+    while(digital(touch) == untouched)
+    {
+        if(analog(line) > between_analog)
+        {
+            motor(left_wheel,left_speed);
+            motor(right_wheel,right_speed);
+        }
+        else
+        {
+            motor(right_wheel,left_speed);
+            motor(left_wheel,right_speed);
+        }
+    }
+    ao();
+}
+
+void drive_forward_time(int speed,int time)
+{
+    motor(left_wheel,speed);
+    motor(right_wheel,speed-buff);
+    msleep(time);
+    ao();
+}
+
+void drive_backwards_time(int speed,int time)
+{
+    motor(left_wheel,-speed);
+    motor(right_wheel,-speed+buff);
+    msleep(time);
+    ao();
+}
+
+void turn_left(int speed,int time)
+{
+    motor(right_wheel,speed);
+    msleep(time);
+    ao();
+}
+
+void turn_right(int speed,int time)
+{
+    motor(left_wheel,speed);
+    msleep(time);
+    ao();
+}
+
+void turn_left_fast(int speed,int time)
+{
+    motor(left_wheel,-speed);
+    motor(right_wheel,speed);
+    msleep(time);
+    ao();
+}
+
+void turn_right_fast(int speed,int time)
+{
+    motor(left_wheel,speed);
+    motor(right_wheel,-speed);
+    msleep(time);
+    ao();
+}
+
+void follow_line_close(int left_speed,int right_speed)
+{
+    while(analog(sonar) < close)
+    {
+        if(analog(line) > between_analog)
+        {
+            motor(left_wheel,left_speed);
+            motor(right_wheel,right_speed);
+        }
+        else
+        {
+            motor(right_wheel,left_speed);
+            motor(left_wheel,right_speed);
+        }
+     }
+     ao();
+}
+
+void follow_line_th_left(int left_speed,int right_speed)
+{
+    while(analog(top_hat_left) < silver)
+    {
+        if(analog(line) > between_analog)
+        {
+            motor(left_wheel,left_speed);
+            motor(right_wheel,right_speed);
+        }
+        else
+        {
+            motor(right_wheel,left_speed);
+            motor(left_wheel,right_speed);
+        }
+    }
+    ao();
+}
+
+void follow_line_th_right(int left_speed,int right_speed)
+{
+    while(analog(top_hat_right) < silver)
+    {
+        if(analog(line) > between_analog)
+        {
+            motor(left_wheel,left_speed);
+            motor(right_wheel,right_speed);
+        }
+        else
+        {
+            motor(right_wheel,left_speed);
+            motor(left_wheel,right_speed);
+        }
+    }
+    ao();
+}
+
+void black_line_forward_th()
+{
+    while(analog(top_hat_left) > silver)
+    {
+        motor(left_wheel,medium);
+    	motor(right_wheel,medium-buff);
+    }
+    ao();
+}
+
+void black_line_backwards_th()
+{
+    while(analog(top_hat_left) > silver)
+    {
+        motor(left_wheel,-medium);
+    	motor(right_wheel,-medium+buff);
+    }
+    ao();  
+}
+
+void white_board_forward_th()
+{
+    while(analog(top_hat_left) < silver)
+    {
+        motor(left_wheel,medium);
+    	motor(right_wheel,medium-buff);
+    }
+    ao();   
+}
+
+void white_board_backwards_th()
+{
+    while(analog(top_hat_left) < silver)
+    {
+        motor(left_wheel,-medium);
+    	motor(right_wheel,-medium-buff);
+    }
+    ao();  
+}
+
+void drive_forward_untouched()
+{
+    while(digital(touch) == untouched)
+    {
+        motor(left_wheel,medium);
+        motor(right_wheel,medium-buff);
+    }
+    ao();
+}
+
+void turn_left_th(int speed)
+{
+    while(analog(top_hat_left) < silver)
+    {
+        motor(left_wheel,speed);
+    }
+    ao();
+}
+
+void turn_right_th(int speed)
+{
+    while(analog(top_hat_right) < silver)
+    {
+        motor(right_wheel,speed);
+    }
+    ao();
+}
+
+void demo_stay(int time)
+{
+    ao();
+    msleep(time);
+}
+
+void special_turn(int left_speed,int right_speed,int time)
+{
+    motor(left_wheel,left_speed);
+    motor(right_wheel,right_speed);
+    msleep(time);
+    ao();
+}
